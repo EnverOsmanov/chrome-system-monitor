@@ -1,10 +1,13 @@
 package monitor
 
-import styles.Default
-import japgolly.scalajs.react.{ReactComponentB, BackendScope}
+import japgolly.scalajs.react._
+import japgolly.scalajs.react.component.builder.Lifecycle
+import japgolly.scalajs.react.vdom.TagMod
 import japgolly.scalajs.react.vdom.all._
 import monitor.modules._
+import monitor.styles.Default
 import org.scalajs.dom
+
 import scalacss.ScalaCssReact._
 
 object App {
@@ -15,12 +18,11 @@ object App {
 
 
   case class Backend(scope: BackendScope[_, State]) {
-    def select(module: Module): Unit = {
-      scope.modState(_.copy(currentView = Some(module)))
-    }
-  }
 
-  case class Props(views: List[() => ReactTag])
+    def select(module: Module): CallbackTo[Unit] =
+      scope.modState(_.copy(currentView = Some(module)))
+
+  }
 
   def centered(element: TagMod) = div(
     display := "flex",
@@ -34,11 +36,9 @@ object App {
   def webgl = {
     val canvas = dom.document.createElement("canvas").asInstanceOf[dom.html.Canvas]
     val gl = canvas.getContext("webgl").asInstanceOf[dom.webgl.RenderingContext]
-    div(
-      for (ext <- gl.getSupportedExtensions()) yield {
-        div(ext)
-      }
-    )
+    val extensionTags = gl.getSupportedExtensions().map(ext => div(ext))
+
+    div(extensionTags:_*)
   }
 
   val modules = List(
@@ -49,27 +49,25 @@ object App {
     About
   )
 
-  val component = ReactComponentB[Unit]("App")
+  val component = ScalaComponent.builder[Unit]("App")
     .initialState(State(Some(CPU)))
-    .backend(new Backend(_))
-    .render((p, s, b) => {
-    div(style.app)(
-      div(style.sidebar)(
-        for (module <- modules) yield {
-          div(
-            onClick --> {
-              b.select(module)
-            },
-            style.menuItem(s.currentView.map(_ == module).getOrElse(false))
-          )(
-              img(style.menuItemIcon)(src := module.iconUrl)
-          )
-        }
-      ),
-      div(style.viewStyle)(
-        s.currentView.map(_.component).getOrElse(empty)
+    .backend(Backend.apply)
+    .render(lifecycle => {
+      div(style.app)(
+        div(style.sidebar)(moduleTags(lifecycle): _*),
+        div(style.viewStyle)(
+          lifecycle.state.currentView.map(_.component).getOrElse(empty)
+        )
       )
-    )
-  }).buildU
+    }).build
 
+
+  def moduleTags(lifecycle: Lifecycle.RenderScope[Unit, State, Backend]): Seq[TagMod] = modules.map { module =>
+    div(
+      onClick --> lifecycle.backend.select(module),
+      style.menuItem(lifecycle.state.currentView.contains(module))
+    )(
+      img(style.menuItemIcon)(src := module.iconUrl)
+    )
+  }
 }

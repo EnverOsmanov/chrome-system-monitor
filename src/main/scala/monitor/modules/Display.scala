@@ -2,8 +2,10 @@ package monitor.modules
 
 import chrome.system.display.bindings.DisplayInfo
 import japgolly.scalajs.react.vdom.all._
-import japgolly.scalajs.react.{BackendScope, _}
+import japgolly.scalajs.react.{BackendScope, Callback, CallbackTo, ScalaComponent}
+import monitor.ui
 
+import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 object Display extends Module {
@@ -27,7 +29,7 @@ object Display extends Module {
 
   case class Backend(scope: BackendScope[_, State]) {
 
-    def init() = {
+    def init(): Future[CallbackTo[Unit]] = {
       chrome.system.display.Display.getInfo.map(displays => {
         scope.modState(_.copy(displays = displays))
       })
@@ -36,18 +38,14 @@ object Display extends Module {
   }
 
 
-  val comp = ReactComponentB[Unit]("Displays")
+  val comp = ScalaComponent.builder[Unit]("Displays")
     .initialState(State())
-    .backend(new Backend(_))
-    .render((p, s, b) => {
-    div(width := "100%")(
-      for (display <- s.displays) yield {
-        displayView(display)
-      }
+    .backend(Backend.apply)
+    .render_S( s =>
+      div(width := "100%")(s.displays.map(displayView): _*)
     )
-  })
-    .componentWillMount((s) => s.backend.init())
-    .buildU
+    .componentWillMount((s) => Callback.future(s.backend.init()))
+    .build
 
   val component: TagMod = comp()
 

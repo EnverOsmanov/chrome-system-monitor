@@ -1,4 +1,4 @@
-package ui
+package monitor.ui
 
 import japgolly.scalajs.react.vdom.all._
 import monitor.styles.Default
@@ -15,13 +15,13 @@ package object components {
     ) ++ firstRowStyle
     table(width := "100%", borderCollapse.collapse)(
       tbody(
-        for ((row, index) <- content.zipWithIndex) yield {
+        content.zipWithIndex.map { case (row, index) =>
           val style = if (index == 0) firstRowStyle else otherRowsStyle
           tr()(
-            td(style)(row._1),
-            td(style)(row._2)
+            td(style: _*)(row._1),
+            td(style: _*)(row._2)
           )
-        }
+        }: _*
       )
     )
   }

@@ -1,6 +1,7 @@
 package monitor.modules
 
 import japgolly.scalajs.react.vdom.all._
+import monitor.ui
 
 object About extends Module {
 

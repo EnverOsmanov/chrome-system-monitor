@@ -1,6 +1,6 @@
 package monitor.styles
 
-import scalacss.Defaults._
+import scalacss.DevDefaults._
 
 
 object Default extends StyleSheet.Inline {

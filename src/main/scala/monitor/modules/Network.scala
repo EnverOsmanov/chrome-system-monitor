@@ -1,10 +1,13 @@
 package monitor.modules
 
 import chrome.system.network._
+import japgolly.scalajs.react.vdom.TagOf
 import japgolly.scalajs.react.vdom.all._
-import japgolly.scalajs.react.{BackendScope, ReactComponentB}
+import japgolly.scalajs.react.{BackendScope, Callback, CallbackTo, ScalaComponent}
 import org.scalajs.dom
+import org.scalajs.dom.html.Div
 
+import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 object Network extends Module {
@@ -16,15 +19,18 @@ object Network extends Module {
   case class State(interfaces: List[Interface] = List(), online: Boolean = false)
   case class Backend(scope: BackendScope[_, State]) {
 
-    def init() = {
+    def init(): Future[CallbackTo[Unit]] = {
       scope.modState(_.copy(online = dom.window.navigator.onLine))
-      dom.window.addEventListener("online", (e: dom.Event) => {
+
+      dom.window.addEventListener("online", (_: dom.Event) =>
+        scope.modState(_.copy(online = dom.window.navigator.onLine))
+      )
+
+      dom.window.addEventListener("offline", (_: dom.Event) => {
         scope.modState(_.copy(online = dom.window.navigator.onLine))
       })
-      dom.window.addEventListener("offline", (e: dom.Event) => {
-        scope.modState(_.copy(online = dom.window.navigator.onLine))
-      })
-      chrome.system.network.Network.getNetworkInterfaces.foreach(ifaces => {
+
+      chrome.system.network.Network.getNetworkInterfaces.map(ifaces => {
         scope.modState(_.copy(interfaces = ifaces))
       })
     }
@@ -33,7 +39,7 @@ object Network extends Module {
 
 
 
-  def interfaceView(iface: Interface): ReactTag = {
+  def interfaceView(iface: Interface): TagOf[Div] = {
     div(
       div(
         padding := "15px 10px",
@@ -49,25 +55,23 @@ object Network extends Module {
         boxShadow := "inset 0px 0px 10px 0px rgba(40, 40, 40, 0.75)",
         overflow.auto
       )(
-        for(configs <- iface.configurations) yield {
+        iface.configurations.map { configs =>
           li(s"${configs.address}/${configs.prefixLength}")
-        }
+        }: _*
       )
     )
   }
 
-  val comp = ReactComponentB[Unit]("NetworkComponent")
+  val comp = ScalaComponent.builder[Unit]("NetworkComponent")
       .initialState(State())
-      .backend(new Backend(_))
-      .render((p, s, b) => {
+      .backend(Backend.apply)
+      .render_S( s => {
         div(width := "100%")(
-          for(iface <- s.interfaces) yield {
-            interfaceView(iface)
-          }
+          s.interfaces.map(interfaceView): _*
         )
       })
-      .componentWillMount((s) => s.backend.init())
-      .buildU
+    .componentWillMount( s => Callback.future(s.backend.init()) )
+    .build
 
   val component: TagMod = comp()
 
