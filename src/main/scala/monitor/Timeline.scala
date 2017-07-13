@@ -54,13 +54,17 @@ class Timeline[T](val sampleCount: Int, val sampleInterval: FiniteDuration)(fun:
     listeners -= listener
   }
 
-  private def tick(): Unit =
-    fun.foreach(addSample)
+  private def tick(): Future[Unit] = for {
+      sample <- fun
+      _ <- Future.traverse(addSample(sample))(_.toFuture)
+  } yield ()
 
 
   def start() = {
     if (intervalHandler.isEmpty)
       intervalHandler = Some(js.timers.setInterval(sampleInterval)(tick()))
+
+    this
   }
 
   def stop() = intervalHandler foreach js.timers.clearInterval

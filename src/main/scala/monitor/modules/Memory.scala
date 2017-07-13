@@ -25,9 +25,11 @@ object Memory extends Module {
 
   class Backend[T](scope: BackendScope[Timeline[T], _]) extends Listener[Timeline[T]] {
 
-    def update(timeline: Timeline[T]): CallbackTo[Unit] =
-      scope.forceUpdate
+    def update(timeline: Timeline[T]): CallbackTo[Unit] = {
+      println("Memory update")
 
+      scope.forceUpdate
+    }
   }
 
   val memoryTimeline = {
@@ -35,7 +37,6 @@ object Memory extends Module {
       chrome.system.memory.Memory.getInfo
     )
     timeline.start()
-    timeline
   }
 
   val comp = ScalaComponent.builder[Timeline[MemoryInfo]]("Memory")
