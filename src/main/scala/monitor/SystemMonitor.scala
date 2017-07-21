@@ -1,28 +1,37 @@
 package monitor
 
-import chrome.app.runtime.bindings.LaunchData
-import chrome.app.window._
-import chrome.app.window.bindings.CreateWindowOptions
-import chrome.utils.ChromeApp
+
+import chrome.runtime.Runtime
+import chrome.tabs.Tabs
+import chrome.tabs.bindings.TabCreateProperties
 import monitor.styles.Default
 import org.scalajs.dom
 import org.scalajs.dom.raw.HTMLStyleElement
+import org.scalajs.dom.window
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+import scala.scalajs.js
 import scalacss.DevDefaults._
 import scalacss.ScalaCssReact._
 
-object SystemMonitor extends ChromeApp {
+object SystemMonitor extends js.JSApp {
 
-  override def onLaunched(launchData: LaunchData): Unit = {
-    val options = CreateWindowOptions(id = "MainWindow")
+  def main(): Unit = {
 
-    Window.create("assets/html/App.html", options).foreach { window =>
-      window.contentWindow.onload = (_: dom.Event) => {
-        val style = Default.render[HTMLStyleElement]
-        window.contentWindow.document.head.appendChild(style)
+    for {
+      backgroundPage ← Runtime.getBackgroundPage
+    } {
+      if (window == backgroundPage) {
+        val firefoxOptions = TabCreateProperties(url = "assets/html/App.html").asInstanceOf[js.Dictionary[_]]
+        firefoxOptions.delete("openerTabId")
+        Tabs.create(firefoxOptions.asInstanceOf[TabCreateProperties])
+      } else {
+        window.onload = (_: dom.Event) => {
+          val style = Default.render[HTMLStyleElement]
+          window.document.head.appendChild(style)
 
-        App.component().renderIntoDOM(window.contentWindow.document.body)
+          App.component().renderIntoDOM(window.document.body)
+        }
       }
     }
   }

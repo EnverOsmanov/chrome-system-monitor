@@ -1,13 +1,13 @@
-import Dependencies.{addLibraries, addJsLibraries}
+import Dependencies.{addJsLibraries, addLibraries}
 import chrome.permissions.Permission
 import chrome.permissions.Permission.API
-import chrome.{App, AppManifest, Background}
+import chrome.{Background, ExtensionManifest}
 import net.lullabyte.{Chrome, ChromeSbtPlugin}
 
 enablePlugins(ChromeSbtPlugin)
 
 name          := "System Monitor"
-version       := "0.2.0"
+version       := "0.2.1"
 scalaVersion  := "2.12.2"
 
 
@@ -24,14 +24,10 @@ skip in packageJSDependencies           := false
 scalacOptions ++= MyBuildConfig.scalacOptions
 
 
-chromeManifest := new AppManifest {
+chromeManifest := new ExtensionManifest {
   val name = Keys.name.value
   val version = Keys.version.value
-  val app = App(
-    background = Background(
-      scripts = List("dependencies.js", "main.js")
-    )
-  )
+  val background = Background(Chrome.defaultScripts)
 
   override val defaultLocale = Some("en")
 

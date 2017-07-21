@@ -19,7 +19,8 @@ object Dependencies {
       "com.github.japgolly.scalajs-react" %%% "extra"           % versions.scalaReact   withSources() withJavadoc(),
       "com.github.japgolly.scalacss"      %%% "core"            % versions.scalacss     withSources() withJavadoc(),
       "com.github.japgolly.scalacss"      %%% "ext-react"       % versions.scalacss     withSources() withJavadoc(),
-      "net.lullabyte"                     %%% "scala-js-chrome" % versions.scalaChrome  withSources() withJavadoc()
+      "net.lullabyte"                     %%% "scala-js-chrome" % versions.scalaChrome  withSources() withJavadoc(),
+      "io.monix" %% "monix" % "2.3.0"
     )
   }
 
@@ -38,7 +39,6 @@ object MyBuildConfig {
   val scalacOptions = Seq(
     "-language:implicitConversions",
     "-language:existentials",
-    "-Xlint",
     "-deprecation",
     "-Xfatal-warnings",
     "-feature"
