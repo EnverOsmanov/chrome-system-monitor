@@ -26,8 +26,6 @@ object Memory extends Module {
   class Backend[T](scope: BackendScope[Timeline[T], _]) extends Listener[Timeline[T]] {
 
     def update(timeline: Timeline[T]): CallbackTo[Unit] = {
-      println("Memory update")
-
       scope.forceUpdate
     }
   }

@@ -2,7 +2,7 @@ package monitor.ui.components
 
 import japgolly.scalajs.react.ScalaComponent
 import japgolly.scalajs.react.vdom.Implicits.{vdomAttrVtKey, vdomAttrVtString}
-import japgolly.scalajs.react.vdom.all.{backgroundColor, borderRadius, flex, svg, vdomElementFromTag}
+import japgolly.scalajs.react.vdom.all.{backgroundColor, borderRadius, flex, svg}
 import japgolly.scalajs.react.vdom.{TagMod, TagOf, VdomElement}
 import monitor.math.{Point, Rectangle}
 import org.scalajs.dom.svg.G

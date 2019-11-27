@@ -5,11 +5,10 @@ import sbt._
 object Dependencies {
 
   object versions {
-    val scalacss = "0.5.3"
-    val scalaReact = "1.0.0"
-    val scalaChrome = "0.5.0"
+    val scalacss = "0.5.6"
+    val scalaReact = "1.4.2"
 
-    val react = "15.3.2"
+    val react = "16.7.0"
   }
 
   def addLibraries() = {
@@ -19,16 +18,22 @@ object Dependencies {
       "com.github.japgolly.scalajs-react" %%% "extra"           % versions.scalaReact   withSources() withJavadoc(),
       "com.github.japgolly.scalacss"      %%% "core"            % versions.scalacss     withSources() withJavadoc(),
       "com.github.japgolly.scalacss"      %%% "ext-react"       % versions.scalacss     withSources() withJavadoc(),
-      "net.lullabyte"                     %%% "scala-js-chrome" % versions.scalaChrome  withSources() withJavadoc()
+      "net.lullabyte"                     %%% "scala-js-chrome" % "0.5.0"               withSources() withJavadoc()
     )
   }
 
   def addJsLibraries() = {
     jsDependencies ++= Seq(
-      "org.webjars" % "react" % versions.react / "react-with-addons.js" commonJSName "React",
-      "org.webjars" % "react" % versions.react / "react-dom.js"         commonJSName "ReactDOM"
-        dependsOn           "react-with-addons.js"
-        minified            "react-dom.min.js"
+      "org.webjars.npm" % "react" % versions.react
+        /        "umd/react.development.js"
+        minified "umd/react.production.min.js"
+        commonJSName "React",
+
+      "org.webjars.npm" % "react-dom" % versions.react
+        /         "umd/react-dom.development.js"
+        minified  "umd/react-dom.production.min.js"
+        dependsOn "umd/react.development.js"
+        commonJSName "ReactDOM"
     )
   }
 }

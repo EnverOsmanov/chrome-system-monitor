@@ -56,7 +56,7 @@ class Timeline[T](val sampleCount: Int, val sampleInterval: FiniteDuration)(fun:
 
   private def tick(): Future[Unit] = for {
       sample <- fun
-      _ <- Future.traverse(addSample(sample))(_.toFuture)
+      _ <- Future.traverse(addSample(sample))(_.asAsyncCallback.unsafeToFuture())
   } yield ()
 
 

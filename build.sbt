@@ -7,8 +7,8 @@ import net.lullabyte.{Chrome, ChromeSbtPlugin}
 enablePlugins(ChromeSbtPlugin)
 
 name          := "System Monitor"
-version       := "0.2.0"
-scalaVersion  := "2.12.2"
+version       := "0.2.1"
+scalaVersion  := "2.12.4"
 
 
 addLibraries()
